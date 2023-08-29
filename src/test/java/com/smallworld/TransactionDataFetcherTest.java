@@ -3,30 +3,40 @@ package com.smallworld;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smallworld.data.Transaction;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.*;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TransactionDataFetcherTest {
 
-    private TransactionDataFetcher transactionDataFetcher;
+    private static TransactionDataFetcher transactionDataFetcher;
 
-    @BeforeEach
-    void setUp() throws IOException {
+    @BeforeAll
+    public static void setUp() throws Exception {
+
+        String jsonContent = loadResourceAsString("transactions.json");
+
         ObjectMapper objectMapper = new ObjectMapper();
-
-        String jsonContent = Files.readString(Paths.get("/Users/shirazmalkani/Downloads/coding_test/transactions.json"));
-
         List<Transaction> transactions = objectMapper.readValue(jsonContent, new TypeReference<>() {});
 
         transactionDataFetcher = new TransactionDataFetcher();
         transactionDataFetcher.setTransactions(transactions);
+    }
+
+    private static String loadResourceAsString(String resourceName) throws Exception {
+        ClassLoader classLoader = TransactionDataFetcherTest.class.getClassLoader();
+        File file = new File(classLoader.getResource(resourceName).getFile());
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        StringBuilder content = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            content.append(line).append(System.lineSeparator());
+        }
+        return content.toString();
     }
 
     @Test
